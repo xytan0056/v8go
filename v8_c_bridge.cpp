@@ -745,7 +745,10 @@ extern "C" {
 				return DupString("Cannot assign to an index beyond the size of an array buffer");
 			}
 			else {
-				((unsigned char*)bufPtr->GetContents().Data())[idx] = new_value_local->ToNumber(ctx).ToLocalChecked()->Value();
+				double doubleValue = new_value_local->ToNumber(ctx).ToLocalChecked()->Value();
+				// JavaScript Uint8Array assignment: (value + 256) % 256 to ensure result is in [0, 255]
+				unsigned char byteValue = static_cast<unsigned char>((static_cast<int>(doubleValue) + 256) % 256);
+				((unsigned char*)bufPtr->GetBackingStore()->Data())[idx] = byteValue;
 			}
 		}
 		else {
